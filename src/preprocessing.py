@@ -22,3 +22,24 @@ def display_missing_values(df:pd.DataFrame)->pd.DataFrame:
 
     return pd.DataFrame(dico_nan)
 
+def drop_col_if_over_50(df:pd.DataFrame)->pd.DataFrame:
+    """
+    Supprimer les colonnes dont le pourcentage de valeurs 
+    manquantes dépasse les 50%
+
+    Parameters:
+    -----------
+    pd.DataFrame
+
+    Returns:
+    --------
+    pd.DataFrame
+        Data frame avec les NaN correctement trouvés
+    """
+
+    cols_to_drop=[]
+    for col in df.columns:
+        if (df[col].isna().sum()/len(df)*100 >=50):
+             cols_to_drop.append(col)
+    return df.drop(columns=cols_to_drop, inplace=True)
+
