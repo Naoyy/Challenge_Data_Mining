@@ -7,3 +7,4 @@ brouillon.ipynb
 tests_model.ipynb
 model_hgboost_bateau.csv
 xgboost_bateau.csv
+xgboost_refit_bateau.csv
