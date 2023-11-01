@@ -30,6 +30,8 @@ def group_fuel_types(category: str):
     else :
         return category
 
+# TODO A supprimer nan ? Utilisé nulle part + no return
+
 def fill_engine_capacity(colonne_category,colonne_engine_capacity):
     fill_missing_values(colonne_engine_capacity)
     if (colonne_category=="ELECTRIC") & (colonne_engine_capacity== np.nan):
@@ -61,10 +63,12 @@ class Preprocessor():
     def fill_engine_capicity(self):
         pass
 
+# TODO Supprimer, il y est déjà 
     @abstractmethod
     def fill_engine_capacity(self):
         pass
 
+# TODO Supprimer, il y est déjà
     @abstractmethod
     def fill_engine_capacity(self):
         pass
@@ -79,6 +83,26 @@ class Preprocessor():
 
     @abstractmethod
     def fill_electric_range(self):
+        pass
+
+    @abstractmethod
+    def fill_type_approval_number(self):
+        pass
+
+    @abstractmethod
+    def fill_category_type(self):
+        pass
+
+    @abstractmethod
+    def fill_wheel_base(self):
+        pass
+
+    @abstractmethod
+    def fill_At_1(self):
+        pass
+    
+    @abstractmethod
+    def fill_At_2(self):
         pass
 
 
@@ -118,7 +142,26 @@ class TrainPreprocessor(Preprocessor):
         fill_missing_values(self.data["Electric range (km)"])
         self.data[~(self.data["Ft"].apply(group_fuel_types).isin(["ELECTRIC", "HYBRID"])) & (self.data["Electric range (km)"].isna())] = 0
         return pd.Series(imputers["Electric range (km)"].transform(self.data["Electric range (km)"].to_numpy().reshape(-1,1)).flatten())
-
+    
+    def fill_type_approval_number(self):
+        fill_missing_values(self.data["Tan"])
+        return pd.Series(imputers["Tan"].transform(self.data["Tan"].to_numpy().reshape(-1,1)).flatten())
+    
+    def fill_category_type(self):
+        fill_missing_values(self.data["Ct"])
+        return pd.Series(imputers["Ct"].transform(self.data["Ct"].to_numpy().reshape(-1,1)).flatten())
+    
+    def fill_wheel_base(self):
+        fill_missing_values(self.data["W (mm)"])
+        return pd.Series(imputers["W (mm)"].transform(self.data["W (mm)"].to_numpy().reshape(-1,1)).flatten())
+    
+    def fill_At_1(self):
+        fill_missing_values(self.data["At1 (mm)"])
+        return pd.Series(imputers["At1 (mm)"].transform(self.data["At1 (mm)"].to_numpy().reshape(-1,1)).flatten())
+    
+    def fill_At_2(self):
+        fill_missing_values(self.data["At2 (mm)"])
+        return pd.Series(imputers["At2 (mm)"].transform(self.data["At2 (mm)"].to_numpy().reshape(-1,1)).flatten())
     
 
 class TestPreprocessor(Preprocessor):
@@ -162,5 +205,35 @@ class TestPreprocessor(Preprocessor):
         self.data[~(self.data["Ft"].apply(group_fuel_types).isin(["ELECTRIC", "HYBRID"])) & (self.data["Electric range (km)"].isna())] = 0
         try:
             return pd.Series(imputers["Electric range (km)"].transform(self.data["Electric range (km)"].to_numpy().reshape(-1,1)).flatten())
+        except:
+            print("Imputer not fitted yet to the train")
+
+    def fill_type_approval_number(self):
+        try:
+            return pd.Series(imputers["Tan"].transform(self.data["Tan"].to_numpy().reshape(-1,1)).flatten())
+        except:
+            print("Imputer not fitted yet to the train")
+
+    def fill_category_type(self):
+        try:
+            return pd.Series(imputers["Ct"].transform(self.data["Ct"].to_numpy().reshape(-1,1)).flatten())
+        except:
+            print("Imputer not fitted yet to the train")
+
+    def fill_wheel_base(self):
+        try:
+            return pd.Series(imputers["W (mm)"].transform(self.data["W (mm)"].to_numpy().reshape(-1,1)).flatten())
+        except:
+            print("Imputer not fitted yet to the train")
+
+    def fill_At_1(self):
+        try:
+            return pd.Series(imputers["At1 (mm)"].transform(self.data["At1 (mm)"].to_numpy().reshape(-1,1)).flatten())
+        except:
+            print("Imputer not fitted yet to the train")
+
+    def fill_At_2(self):
+        try:
+            return pd.Series(imputers["At2 (mm)"].transform(self.data["At2 (mm)"].to_numpy().reshape(-1,1)).flatten())
         except:
             print("Imputer not fitted yet to the train")
