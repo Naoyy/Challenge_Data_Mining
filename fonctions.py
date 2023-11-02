@@ -31,6 +31,7 @@ def group_fuel_types(category: str):
     else :
         return category
 
+
 # def fill_engine_capacity(colonne_category,colonne_engine_capacity):
 #     fill_missing_values(colonne_engine_capacity)
 #     if (colonne_category=="ELECTRIC") & (colonne_engine_capacity== np.nan):
