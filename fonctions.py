@@ -89,17 +89,6 @@ class TrainPreprocessor(Preprocessor):
     def __init__(self,data : Dataset):
          self.data=data
          pass
-     
-    def fill_missing_values(self,colname: str):
-        #colname=colonne.name
-        if self.data[colname].dtype in ["float64"]:
-            if _coefficient_variation(self.data[colname]) > 0.15 :
-                imputers[colname]=SimpleImputer(missing_values=np.nan,strategy="median")
-            else:
-                imputers[colname]=SimpleImputer(missing_values=np.nan,strategy="mean")
-        else:
-            imputers[colname]=SimpleImputer(missing_values=np.nan, strategy='most_frequent')
-        return pd.Series(imputers[colname].fit_transform(self.data[colname].to_numpy().reshape(-1,1)).flatten())
     
     def fill_engine_capacity(self):
         _fill_missing_values(self.data["ec (cm3)"])
@@ -130,15 +119,7 @@ class TrainPreprocessor(Preprocessor):
 class TestPreprocessor(Preprocessor):
     def __init__(self,data : Dataset):
          self.data=data
-         pass
-     
-    def fill_missing_values(self,colname: str):
-        #colname=colonne.name
-        try :
-            return pd.Series(imputers[colname].transform(self.data[colname].to_numpy().reshape(-1,1)).flatten())
-        except:
-            print("Imputer not fitted yet to the train")
-    
+         pass    
 
     def fill_engine_capacity(self):
         self.data.loc[(self.data["Ft"].apply(group_fuel_types)=="ELECTRIC") & (self.data["ec (cm3)"].isna()),"ec (cm3)"] = 0
