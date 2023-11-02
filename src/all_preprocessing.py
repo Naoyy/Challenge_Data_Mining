@@ -166,36 +166,3 @@ def preprocessing_1(df:pd.DataFrame,is_train=True)->pd.DataFrame:
     return df
 
 
-
-######################
-# Encoders pour mise #
-# en classe          #
-######################
-
-ohe_encoders={}
-
-def ohe_encoding_train(df: pd.DataFrame, column_name: str) -> pd.DataFrame:
-    ohe_encoder = OneHotEncoder(sparse_output=False, drop='first')
-    ohe_features = ohe_encoder.fit_transform(df[[column_name]])
-    ohe_encoders[column_name] = ohe_encoder  # Stocker l'encodeur 
-
-    ohe_features = pd.DataFrame(ohe_features, columns=ohe_encoder.get_feature_names_out([column_name]))
-
-    df.drop(columns=column_name, inplace=True)
-    df.reset_index(drop=True, inplace=True)
-    df = pd.concat([df, ohe_features], axis=1)
-
-    return df
-
-def ohe_encoding_test(df:pd.DataFrame,column_name: str) -> pd.DataFrame:
-    try:
-        ohe_encoder = ohe_encoders[column_name]
-        ohe_features = ohe_encoder.transform(df[[column_name]])
-        ohe_features = pd.DataFrame(ohe_features, columns=ohe_encoder.get_feature_names_out([column_name]))
-
-        df.drop(columns=column_name, inplace=True)
-        df.reset_index(drop=True, inplace=True)
-        df = pd.concat([df, ohe_features], axis=1)
-        return df
-    except:
-        print("no encoders try encoding train first")
