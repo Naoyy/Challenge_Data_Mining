@@ -10,6 +10,16 @@ related_to_type=[]
 columns_to_delete=['MMS', 'r', 'Ernedc (g/km)', 'De', 'Vf', 'Status','Va','Ve','Enedc (g/km)','IT','Country','Date of registration']
 imputers={}
 ohe_encoders={}
+boundaries={}
+
+def _is_outlier(colonne : pd.Series) -> pd.Series:
+        Q1=colonne.quantile(q=0.25)
+        Q3=colonne.quantile(q=0.75)
+        IQR=Q3-Q1
+        boundaries[colonne.name]=(Q1-1.5*IQR,Q3+1.5*IQR)
+        out_col=colonne.apply(lambda x: 1 if (((x!=np.nan) & (x>boundaries[colonne.name][1]) | (x<boundaries[colonne.name][0]))) else 0)
+        return out_col
+
 
 def _fill_missing_values(colonne : pd.Series) -> None:
     colname=colonne.name
@@ -105,6 +115,10 @@ class Preprocessor():
     def encode_that_var(self):
         pass
 
+    @abstractmethod
+    def outlier_detection(self):
+        pass
+
 class TrainPreprocessor(Preprocessor):
      
     def __init__(self,data : Dataset):
@@ -187,6 +201,10 @@ class TrainPreprocessor(Preprocessor):
         self.data = pd.concat([self.data, ohe_features], axis=1)
 
         return self.data
+    
+    def outlier_detection(self,colname:str):
+          self.data[f"flag_{colname}"]=_is_outlier(self.data[colname])
+          pass
 
 
 
@@ -287,3 +305,10 @@ class TestPreprocessor(Preprocessor):
             return self.data
         except:
             print(f"no encoders try encoding {column_name} in train first")
+
+
+    def outlier_detection(self,colname:str):
+        try:
+            self.data[f"flag_{colname}"]=self.data[colname].apply(lambda x: 1 if ((x!=np.nan) & ((x>boundaries[colname][1]) | (x<boundaries[colname][0]))) else 0)
+        except:
+            print("Boundaries on train data not found")

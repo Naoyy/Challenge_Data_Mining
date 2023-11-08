@@ -8,3 +8,9 @@ tests_model.ipynb
 model_hgboost_bateau.csv
 xgboost_bateau.csv
 xgboost_refit_bateau.csv
+fonctions_bis.py
+xgboost_results1.csv
+
+xgboost_results2.csv
+
+xgboost_results3.csv
