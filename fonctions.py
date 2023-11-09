@@ -1,15 +1,16 @@
 import numpy as np
 import pandas as pd
 from sklearn.impute import SimpleImputer
-from sklearn.preprocessing import OneHotEncoder
+from sklearn.preprocessing import OneHotEncoder, LabelEncoder
 
 _coefficient_variation= lambda series : series.std()/series.mean()
 
 columns_to_treat=[]
 related_to_type=[]
-columns_to_delete=['MMS', 'r', 'Ernedc (g/km)', 'De', 'Vf', 'Status','Va','Ve','Enedc (g/km)','IT','Country','Date of registration']
+columns_to_delete=['MMS', 'r', 'Ernedc (g/km)', 'De', 'Vf', 'Status','Va','Ve','Enedc (g/km)','IT','Date of registration'] #,'Country'
 imputers={}
 ohe_encoders={}
+label_encoders={}
 boundaries={}
 
 def _is_outlier(colonne : pd.Series) -> pd.Series:
@@ -119,6 +120,10 @@ class Preprocessor():
     def outlier_detection(self):
         pass
 
+    @abstractmethod
+    def encode_country():
+        pass
+
 class TrainPreprocessor(Preprocessor):
      
     def __init__(self,data : Dataset):
@@ -205,7 +210,11 @@ class TrainPreprocessor(Preprocessor):
     def outlier_detection(self,colname:str):
           self.data[f"flag_{colname}"]=_is_outlier(self.data[colname])
           pass
-
+    
+    def encode_country(self):
+        label_encoders["Country"]=LabelEncoder()
+        self.data["Country"]=label_encoders["Country"].fit_transform(self.data["Country"])
+        pass
 
 
 class TestPreprocessor(Preprocessor):
@@ -312,3 +321,11 @@ class TestPreprocessor(Preprocessor):
             self.data[f"flag_{colname}"]=self.data[colname].apply(lambda x: 1 if ((x!=np.nan) & ((x>boundaries[colname][1]) | (x<boundaries[colname][0]))) else 0)
         except:
             print("Boundaries on train data not found")
+
+
+    def encode_country(self):
+        try:
+            self.data["Country"]=label_encoders["Country"].transform(self.data["Country"])
+        except:
+            print("Country variable not encoded yet.")
+        pass
