@@ -127,8 +127,8 @@ class TrainPreprocessor(Preprocessor):
 
     def last_step(self):
         self.data.drop(columns=columns_to_delete, inplace=True)
-        selected_columns = [col for col in self.data.columns if col not in ['ID','Ewltp (g/km)','Date of registration']]
-        self.data.drop_duplicates(subset=selected_columns, inplace=True)
+        #selected_columns = [col for col in self.data.columns if col not in ['ID','Ewltp (g/km)','Date of registration']]
+        #self.data.drop_duplicates(subset=selected_columns, inplace=True)
         pass
     
     def fill_engine_capacity(self):
