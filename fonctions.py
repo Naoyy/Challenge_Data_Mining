@@ -123,6 +123,10 @@ class Preprocessor():
     @abstractmethod
     def encode_country():
         pass
+    
+    @abstractmethod
+    def encode_manufacture_pooling():
+        pass
 
 class TrainPreprocessor(Preprocessor):
      
@@ -214,6 +218,12 @@ class TrainPreprocessor(Preprocessor):
     def encode_country(self):
         label_encoders["Country"]=LabelEncoder()
         self.data["Country"]=label_encoders["Country"].fit_transform(self.data["Country"])
+        pass
+
+    def encode_manufacture_pooling(self):
+        label_encoders['Mp']=LabelEncoder()
+        self.data["Mp"].fillna("UNKNOWN", inplace=True)
+        self.data["Mp"]=label_encoders["Mp"].fit_transform(self.data['Mp'])
         pass
 
 
@@ -329,3 +339,13 @@ class TestPreprocessor(Preprocessor):
         except:
             print("Country variable not encoded yet.")
         pass
+
+    def encode_manufacture_pooling(self):
+        try:
+            self.data["Mp"].fillna("UNKNOWN", inplace=True)
+            self.data["Mp"]=label_encoders["Mp"].transform(self.data["Mp"])
+        except:
+            print("Mp variable not encoded yet.")
+        pass
+
+    
