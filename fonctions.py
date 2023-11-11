@@ -1,15 +1,27 @@
 import numpy as np
 import pandas as pd
 from sklearn.impute import SimpleImputer
-from sklearn.preprocessing import OneHotEncoder
+from sklearn.preprocessing import OneHotEncoder, LabelEncoder, OrdinalEncoder
 
 _coefficient_variation= lambda series : series.std()/series.mean()
 
 columns_to_treat=[]
 related_to_type=[]
-columns_to_delete=['MMS', 'r', 'Ernedc (g/km)', 'De', 'Vf', 'Status','Va','Ve','Enedc (g/km)','IT','Country','Date of registration']
+columns_to_delete=['MMS', 'r', 'Ernedc (g/km)', 'De', 'Vf', 'Status','Va','Ve','Enedc (g/km)','IT','Date of registration'] #,'Country'
 imputers={}
 ohe_encoders={}
+label_encoders={}
+ordinal_encoders={}
+boundaries={}
+
+def _is_outlier(colonne : pd.Series) -> pd.Series:
+        Q1=colonne.quantile(q=0.25)
+        Q3=colonne.quantile(q=0.75)
+        IQR=Q3-Q1
+        boundaries[colonne.name]=(Q1-1.5*IQR,Q3+1.5*IQR)
+        out_col=colonne.apply(lambda x: 1 if (((x!=np.nan) & (x>boundaries[colonne.name][1]) | (x<boundaries[colonne.name][0]))) else 0)
+        return out_col
+
 
 def _fill_missing_values(colonne : pd.Series) -> None:
     colname=colonne.name
@@ -52,9 +64,6 @@ class Dataset():
 
 from abc import abstractmethod
 class Preprocessor():
-
-    imputers={}
-    ohe_encoders={}
 
     @abstractmethod
     def last_step(self):
@@ -100,9 +109,33 @@ class Preprocessor():
     @abstractmethod
     def fill_engine_power(self):
         pass
+    @abstractmethod
+    def fill_test_mass(self):
+        pass
+    @abstractmethod
+    def fill_fuel_mode(self):
+        pass
 
     @abstractmethod
-    def encode_that_var(self):
+    def ohe_that_var(self):
+        pass
+
+    @abstractmethod
+    def outlier_detection(self):
+        pass
+
+    @abstractmethod
+    def encode_country():
+        pass
+    
+    @abstractmethod
+    def encode_manufacture_pooling():
+        pass
+    @abstractmethod
+    def encode_fuel_mode():
+        pass
+    @abstractmethod
+    def encode_fuel_type():
         pass
 
 class TrainPreprocessor(Preprocessor):
@@ -113,8 +146,8 @@ class TrainPreprocessor(Preprocessor):
 
     def last_step(self):
         self.data.drop(columns=columns_to_delete, inplace=True)
-        selected_columns = [col for col in self.data.columns if col not in ['ID','Ewltp (g/km)','Date of registration']]
-        self.data.drop_duplicates(subset=selected_columns, inplace=True)
+        #selected_columns = [col for col in self.data.columns if col not in ['ID','Ewltp (g/km)','Date of registration']]
+        #self.data.drop_duplicates(subset=selected_columns, inplace=True)
         pass
     
     def fill_engine_capacity(self):
@@ -175,7 +208,20 @@ class TrainPreprocessor(Preprocessor):
         self.data["ep (KW)"] = pd.Series(imputers["ep (KW)"].transform(self.data["ep (KW)"].to_numpy().reshape(-1,1)).flatten())
         pass 
 
-    def encode_that_var(self,column_name:str):
+    def fill_test_mass(self):
+        _fill_missing_values(self.data["Mt"])
+        self.data["Mt"] = pd.Series(imputers["Mt"].transform(self.data["Mt"].to_numpy().reshape(-1,1)).flatten())
+        pass
+
+    def fill_fuel_mode(self):
+        _fill_missing_values(self.data["Fm"])
+        self.data.loc[(self.data["Ft"].apply(group_fuel_types) =="ELECTRIC") & (self.data["Fm"].isna()),"Fm"] = "E"
+        self.data.loc[(self.data["Ft"].apply(group_fuel_types) =="HYBRID") & (self.data["Fm"].isna()),"Fm"] = "P"
+        self.data["Fm"]= pd.Series(imputers["Fm"].transform(self.data["Fm"].to_numpy().reshape(-1,1)).flatten())
+        pass
+
+
+    def ohe_that_var(self,column_name:str):
         ohe_encoder = OneHotEncoder(sparse_output=False, drop='first')
         ohe_features = ohe_encoder.fit_transform(self.data[[column_name]])
         ohe_encoders[column_name] = ohe_encoder  # Stocker l'encodeur 
@@ -187,7 +233,34 @@ class TrainPreprocessor(Preprocessor):
         self.data = pd.concat([self.data, ohe_features], axis=1)
 
         return self.data
+    
+    def outlier_detection(self,colname:str):
+          self.data[f"flag_{colname}"]=_is_outlier(self.data[colname])
+          pass
+    
+    def encode_country(self):
+        label_encoders["Country"]=LabelEncoder()
+        self.data["Country"]=label_encoders["Country"].fit_transform(self.data["Country"])
+        pass
 
+
+    def encode_manufacture_pooling(self):
+        label_encoders['Mp']=LabelEncoder()
+        self.data["Mp"].fillna("UNKNOWN", inplace=True)
+        self.data["Mp"]=label_encoders["Mp"].fit_transform(self.data['Mp'])
+        pass
+
+    def encode_fuel_mode(self):
+        ordinal_encoders["Fm"]=OrdinalEncoder()
+        self.data["Fm"]=ordinal_encoders["Fm"].fit_transform(self.data[["Fm"]])
+        pass
+
+    def encode_fuel_type(self):
+        ordinal_encoders["Ft"]=OrdinalEncoder()
+        self.data['Ft'].apply(group_fuel_types)
+        self.data["Ft"]=ordinal_encoders["Ft"].fit_transform(self.data[["Ft"]])
+        pass
+    
 
 
 class TestPreprocessor(Preprocessor):
@@ -275,6 +348,20 @@ class TestPreprocessor(Preprocessor):
         except:
             print("Imputer ep (KW) not fitted yet to the train")
 
+    def fill_test_mass(self):
+        try:
+            self.data["Mt"] =pd.Series(imputers["Mt"].transform(self.data["Mt"].to_numpy().reshape(-1,1)).flatten())
+            pass
+        except:
+            print("Imputer Mt not fitted yet to the train")
+
+    def fill_fuel_mode(self):
+        try:
+            self.data["Fm"] =pd.Series(imputers["Fm"].transform(self.data["Fm"].to_numpy().reshape(-1,1)).flatten())
+            pass
+        except:
+            print("Imputer Fm not fitted yet to the train")
+
     def encode_that_var(self,column_name:str):
         try:
             ohe_encoder = ohe_encoders[column_name]
@@ -287,3 +374,41 @@ class TestPreprocessor(Preprocessor):
             return self.data
         except:
             print(f"no encoders try encoding {column_name} in train first")
+
+
+    def outlier_detection(self,colname:str):
+        try:
+            self.data[f"flag_{colname}"]=self.data[colname].apply(lambda x: 1 if ((x!=np.nan) & ((x>boundaries[colname][1]) | (x<boundaries[colname][0]))) else 0)
+        except:
+            print("Boundaries on train data not found")
+
+
+    def encode_country(self):
+        try:
+            self.data["Country"]=label_encoders["Country"].transform(self.data["Country"])
+        except:
+            print("Country variable not encoded yet.")
+        pass
+
+    def encode_manufacture_pooling(self):
+        try:
+            self.data["Mp"].fillna("UNKNOWN", inplace=True)
+            self.data["Mp"]=label_encoders["Mp"].transform(self.data["Mp"])
+        except:
+            print("Mp variable not encoded yet.")
+        pass
+
+    def encode_fuel_mode(self):
+        try:
+            self.data["Fm"]=ordinal_encoders["Fm"].transform(self.data[["Fm"]])
+        except:
+            print("Fm variable not encoded yet.")
+        pass
+
+    def encode_fuel_type(self):
+        try:
+            self.data["Ft"]=ordinal_encoders["Ft"].transform(self.data[["Ft"]])
+        except:
+            print("Ft variable not encoded yet.")
+        pass
+    
