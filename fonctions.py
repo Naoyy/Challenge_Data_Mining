@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 from sklearn.impute import SimpleImputer
-from sklearn.preprocessing import OneHotEncoder, LabelEncoder
+from sklearn.preprocessing import OneHotEncoder, LabelEncoder, OrdinalEncoder
 
 _coefficient_variation= lambda series : series.std()/series.mean()
 
@@ -11,6 +11,7 @@ columns_to_delete=['MMS', 'r', 'Ernedc (g/km)', 'De', 'Vf', 'Status','Va','Ve','
 imputers={}
 ohe_encoders={}
 label_encoders={}
+ordinal_encoders={}
 boundaries={}
 
 def _is_outlier(colonne : pd.Series) -> pd.Series:
@@ -64,9 +65,6 @@ class Dataset():
 from abc import abstractmethod
 class Preprocessor():
 
-    imputers={}
-    ohe_encoders={}
-
     @abstractmethod
     def last_step(self):
         pass
@@ -111,9 +109,15 @@ class Preprocessor():
     @abstractmethod
     def fill_engine_power(self):
         pass
+    @abstractmethod
+    def fill_test_mass(self):
+        pass
+    @abstractmethod
+    def fill_fuel_mode(self):
+        pass
 
     @abstractmethod
-    def encode_that_var(self):
+    def ohe_that_var(self):
         pass
 
     @abstractmethod
@@ -126,6 +130,12 @@ class Preprocessor():
     
     @abstractmethod
     def encode_manufacture_pooling():
+        pass
+    @abstractmethod
+    def encode_fuel_mode():
+        pass
+    @abstractmethod
+    def encode_fuel_type():
         pass
 
 class TrainPreprocessor(Preprocessor):
@@ -198,7 +208,20 @@ class TrainPreprocessor(Preprocessor):
         self.data["ep (KW)"] = pd.Series(imputers["ep (KW)"].transform(self.data["ep (KW)"].to_numpy().reshape(-1,1)).flatten())
         pass 
 
-    def encode_that_var(self,column_name:str):
+    def fill_test_mass(self):
+        _fill_missing_values(self.data["Mt"])
+        self.data["Mt"] = pd.Series(imputers["Mt"].transform(self.data["Mt"].to_numpy().reshape(-1,1)).flatten())
+        pass
+
+    def fill_fuel_mode(self):
+        _fill_missing_values(self.data["Fm"])
+        self.data.loc[(self.data["Ft"].apply(group_fuel_types) =="ELECTRIC") & (self.data["Fm"].isna()),"Fm"] = "E"
+        self.data.loc[(self.data["Ft"].apply(group_fuel_types) =="HYBRID") & (self.data["Fm"].isna()),"Fm"] = "P"
+        self.data["Fm"]= pd.Series(imputers["Fm"].transform(self.data["Fm"].to_numpy().reshape(-1,1)).flatten())
+        pass
+
+
+    def ohe_that_var(self,column_name:str):
         ohe_encoder = OneHotEncoder(sparse_output=False, drop='first')
         ohe_features = ohe_encoder.fit_transform(self.data[[column_name]])
         ohe_encoders[column_name] = ohe_encoder  # Stocker l'encodeur 
@@ -220,11 +243,24 @@ class TrainPreprocessor(Preprocessor):
         self.data["Country"]=label_encoders["Country"].fit_transform(self.data["Country"])
         pass
 
+
     def encode_manufacture_pooling(self):
         label_encoders['Mp']=LabelEncoder()
         self.data["Mp"].fillna("UNKNOWN", inplace=True)
         self.data["Mp"]=label_encoders["Mp"].fit_transform(self.data['Mp'])
         pass
+
+    def encode_fuel_mode(self):
+        ordinal_encoders["Fm"]=OrdinalEncoder()
+        self.data["Fm"]=ordinal_encoders["Fm"].fit_transform(self.data[["Fm"]])
+        pass
+
+    def encode_fuel_type(self):
+        ordinal_encoders["Ft"]=OrdinalEncoder()
+        self.data['Ft'].apply(group_fuel_types)
+        self.data["Ft"]=ordinal_encoders["Ft"].fit_transform(self.data[["Ft"]])
+        pass
+    
 
 
 class TestPreprocessor(Preprocessor):
@@ -312,6 +348,20 @@ class TestPreprocessor(Preprocessor):
         except:
             print("Imputer ep (KW) not fitted yet to the train")
 
+    def fill_test_mass(self):
+        try:
+            self.data["Mt"] =pd.Series(imputers["Mt"].transform(self.data["Mt"].to_numpy().reshape(-1,1)).flatten())
+            pass
+        except:
+            print("Imputer Mt not fitted yet to the train")
+
+    def fill_fuel_mode(self):
+        try:
+            self.data["Fm"] =pd.Series(imputers["Fm"].transform(self.data["Fm"].to_numpy().reshape(-1,1)).flatten())
+            pass
+        except:
+            print("Imputer Fm not fitted yet to the train")
+
     def encode_that_var(self,column_name:str):
         try:
             ohe_encoder = ohe_encoders[column_name]
@@ -348,4 +398,17 @@ class TestPreprocessor(Preprocessor):
             print("Mp variable not encoded yet.")
         pass
 
+    def encode_fuel_mode(self):
+        try:
+            self.data["Fm"]=ordinal_encoders["Fm"].transform(self.data[["Fm"]])
+        except:
+            print("Fm variable not encoded yet.")
+        pass
+
+    def encode_fuel_type(self):
+        try:
+            self.data["Ft"]=ordinal_encoders["Ft"].transform(self.data[["Ft"]])
+        except:
+            print("Ft variable not encoded yet.")
+        pass
     
