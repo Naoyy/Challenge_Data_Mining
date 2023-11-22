@@ -131,9 +131,11 @@ class Preprocessor():
     @abstractmethod
     def encode_manufacture_pooling():
         pass
+
     @abstractmethod
     def encode_fuel_mode():
         pass
+    
     @abstractmethod
     def encode_fuel_type():
         pass
@@ -362,7 +364,7 @@ class TestPreprocessor(Preprocessor):
         except:
             print("Imputer Fm not fitted yet to the train")
 
-    def encode_that_var(self,column_name:str):
+    def ohe_that_var(self,column_name:str):
         try:
             ohe_encoder = ohe_encoders[column_name]
             ohe_features = ohe_encoder.transform(self.data[[column_name]])
