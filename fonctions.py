@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 from sklearn.impute import SimpleImputer
-from sklearn.preprocessing import OneHotEncoder, LabelEncoder, OrdinalEncoder
+from sklearn.preprocessing import OneHotEncoder, LabelEncoder, OrdinalEncoder, RobustScaler
 
 _coefficient_variation= lambda series : series.std()/series.mean()
 
@@ -13,6 +13,7 @@ ohe_encoders={}
 label_encoders={}
 ordinal_encoders={}
 boundaries={}
+normalise= {}
 
 def _is_outlier(colonne : pd.Series) -> pd.Series:
         Q1=colonne.quantile(q=0.25)
@@ -146,6 +147,12 @@ class Preprocessor():
     @abstractmethod
     def encode_category_registered():
         pass
+    @abstractmethod
+    def encode_manufacturer_name():
+        pass
+    @abstractmethod
+    def robust_normalise(self):
+        pass
 
 class TrainPreprocessor(Preprocessor):
      
@@ -276,9 +283,18 @@ class TrainPreprocessor(Preprocessor):
 
     def encode_fuel_type(self):
         ordinal_encoders["Ft"]=OrdinalEncoder()
-        self.data['Ft'].apply(group_fuel_types)
-        self.data["Ft"]=ordinal_encoders["Ft"].fit_transform(self.data[["Ft"]])
+        self.data["Ft"]=pd.Series(ordinal_encoders["Ft"].fit_transform(self.data["Ft"].apply(group_fuel_types).to_numpy().reshape(-1,1)).flatten()) 
         pass
+
+    def encode_manufacturer_name(self):
+        label_encoders["Man"]=LabelEncoder()
+        self.data['Man']= label_encoders['Man'].fit_transform(self.data['Man'].astype(str))
+        pass
+
+    def robust_normalise(self,colname:str):
+          normalise[colname]=RobustScaler()
+          self.data[colname] = pd.Series(normalise[colname].fit_transform(self.data[colname].to_numpy().reshape(-1,1)).flatten())
+          pass
     
 
 
@@ -426,7 +442,7 @@ class TestPreprocessor(Preprocessor):
 
     def encode_fuel_type(self):
         try:
-            self.data["Ft"]=ordinal_encoders["Ft"].transform(self.data[["Ft"]])
+            self.data["Ft"]=pd.Series(ordinal_encoders["Ft"].transform(self.data["Ft"].apply(group_fuel_types).to_numpy().reshape(-1,1)).flatten())
         except:
             print("Ft variable not encoded yet.")
         pass
@@ -443,4 +459,16 @@ class TestPreprocessor(Preprocessor):
             self.data["Cr"]=ordinal_encoders["Cr"].transform(self.data[["Cr"]])
         except:
             print("Cr variable not encoded yet in Train.")
+        pass
+    def encode_manufacturer_name(self):
+        try:
+            self.data["Man"]=label_encoders["Man"].transform(self.data["Man"].astype(str))
+        except:
+            print("Man variable not encoded yet in Train.")
+        pass
+    def robust_normalise(self,colname:str):
+        try:
+            self.data[colname]=pd.Series(normalise[colname].transform(self.data[colname].to_numpy().reshape(-1,1)).flatten())
+        except:
+            print(f"{colname} variable not encoded yet in Train.")
         pass
