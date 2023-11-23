@@ -139,6 +139,13 @@ class Preprocessor():
     @abstractmethod
     def encode_fuel_type():
         pass
+    @abstractmethod
+    def encode_category_type():
+        pass
+
+    @abstractmethod
+    def encode_category_registered():
+        pass
 
 class TrainPreprocessor(Preprocessor):
      
@@ -255,6 +262,16 @@ class TrainPreprocessor(Preprocessor):
     def encode_fuel_mode(self):
         ordinal_encoders["Fm"]=OrdinalEncoder()
         self.data["Fm"]=ordinal_encoders["Fm"].fit_transform(self.data[["Fm"]])
+        pass
+
+    def encode_category_type(self):
+        ordinal_encoders["Ct"]=OrdinalEncoder()
+        self.data["Ct"]=ordinal_encoders["Ct"].fit_transform(self.data[["Ct"]])
+        pass
+    
+    def encode_category_registered(self):
+        ordinal_encoders["Cr"]=OrdinalEncoder()
+        self.data["Cr"]=ordinal_encoders["Cr"].fit_transform(self.data[["Cr"]])
         pass
 
     def encode_fuel_type(self):
@@ -413,4 +430,17 @@ class TestPreprocessor(Preprocessor):
         except:
             print("Ft variable not encoded yet.")
         pass
-    
+
+    def encode_category_type(self):
+        try:
+            self.data["Ct"]=ordinal_encoders["Ct"].transform(self.data[["Ct"]])
+        except:
+            print("Ct variable not encoded yet in Train.")
+        pass
+
+    def encode_category_registered(self):
+        try:
+            self.data["Cr"]=ordinal_encoders["Cr"].transform(self.data[["Cr"]])
+        except:
+            print("Cr variable not encoded yet in Train.")
+        pass
