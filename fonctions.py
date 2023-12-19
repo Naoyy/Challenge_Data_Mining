@@ -71,6 +71,10 @@ class Preprocessor():
         pass
 
     @abstractmethod
+    def fill_vehicule_family_number(self):
+        pass
+
+    @abstractmethod
     def fill_missing_values(self):
         pass
 
@@ -154,6 +158,9 @@ class Preprocessor():
     def robust_normalise(self):
         pass
 
+    def encode_vehicule_family_number(self):
+        pass
+
 class TrainPreprocessor(Preprocessor):
      
     def __init__(self,data : Dataset):
@@ -164,6 +171,10 @@ class TrainPreprocessor(Preprocessor):
         self.data.drop(columns=columns_to_delete, inplace=True)
         #selected_columns = [col for col in self.data.columns if col not in ['ID','Ewltp (g/km)','Date of registration']]
         #self.data.drop_duplicates(subset=selected_columns, inplace=True)
+        pass
+
+    def fill_vehicule_family_number(self):
+        self.data["VFN"]=self.data["VFN"].fillna("UNKNOWN")
         pass
     
     def fill_engine_capacity(self):
@@ -291,11 +302,17 @@ class TrainPreprocessor(Preprocessor):
         self.data['Man']= label_encoders['Man'].fit_transform(self.data['Man'].astype(str))
         pass
 
+
+
     def robust_normalise(self,colname:str):
           normalise[colname]=RobustScaler()
           self.data[colname] = pd.Series(normalise[colname].fit_transform(self.data[colname].to_numpy().reshape(-1,1)).flatten())
           pass
     
+    def encode_vehicule_family_number(self):
+        label_encoders["VFN"]=LabelEncoder()
+        self.data["VFN"]=label_encoders["VFN"].fit_transform(self.data["VFN"])
+        pass
 
 
 class TestPreprocessor(Preprocessor):
@@ -305,6 +322,10 @@ class TestPreprocessor(Preprocessor):
     
     def last_step(self):
         self.data.drop(columns= columns_to_delete, inplace = True)
+        pass
+
+    def fill_vehicule_family_number(self):
+        self.data["VFN"]=self.data["VFN"].fillna("UNKNOWN")
         pass
 
     def fill_engine_capacity(self):
@@ -460,15 +481,25 @@ class TestPreprocessor(Preprocessor):
         except:
             print("Cr variable not encoded yet in Train.")
         pass
+
+
     def encode_manufacturer_name(self):
         try:
-            self.data["Man"]=label_encoders["Man"].transform(self.data["Man"].astype(str))
+            self.data["Man"]=label_encoders["Man"].fit_transform(self.data["Man"].astype(str))
         except:
             print("Man variable not encoded yet in Train.")
         pass
+
     def robust_normalise(self,colname:str):
         try:
             self.data[colname]=pd.Series(normalise[colname].transform(self.data[colname].to_numpy().reshape(-1,1)).flatten())
         except:
             print(f"{colname} variable not encoded yet in Train.")
+        pass
+
+    def encode_vehicule_family_number(self):
+        try:
+            self.data["VFN"]=label_encoders["VFN"].fit_transform(self.data["VFN"])
+        except:
+            print("Encoder for VFN variable not fitted yet.")
         pass
