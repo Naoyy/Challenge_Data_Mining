@@ -47,7 +47,7 @@ Le notebook models.ipynb contient les modèles qui ont été utilisés pour les 
     - sample_submission.csv (exemple type de submission kaggle)
 
 - src/
-    - preprocessing.py (contient la mise en classe et le preprocessing)
+    - preprocessing.py
     - baseline.py
 
 - results/
