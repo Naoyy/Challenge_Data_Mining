@@ -15,7 +15,7 @@ Accéder à la compétition Kaggle:
 ## A Propos du Projet
 
 Dans le cadre de cette compétition Kaggle, la promotion MoSEF 2024 se lance dans un problème d'apprentissage supervisé. L'objectif est de prédire les émissions de CO2 en (g/km) de voitures en Europe. Pour cela on dispose de données regrouppant les caractéristiques de voitures. Les groupes sont en binômes et tentent de prédire le plus justement possible la cible. La métrique d'évaluation utilisée pour cette compétition est la Mean Absolute Error (MAE) qu'il faudra minimiser. On classe ensuite les participants, l'équipe avec la MAE la plus faible étant première. 
-
+<a name="a-propos-du-projet"></a>
 
 ## Travailler sur le projet
 1. Cloner le repository
@@ -31,7 +31,7 @@ python3 -m venv .venv_mining
 source .venv_mining/bin/activate
 pip install -r requirements.txt
 ```
-
+<a name="travailler-sur-le-projet"></a>
 
 ## Organisation du Projet
 
@@ -65,8 +65,10 @@ Le notebook models.ipynb contient les modèles qui ont été utilisés pour les 
 - presentation.pdf
 
 - requirements.txt
+<a name="organisation-du-projet"></a>
 
 ## Contact
 
 - [Jynaldo Jeannot](https://github.com/jeannoj99) - Jynaldo.Jeannot@etu.univ-paris1.fr
 - [Yoan Jsem](https://github.com/Naoyy) - Yoan.Jsem@etu.univ-paris1.fr
+<a name="contact"></a>
