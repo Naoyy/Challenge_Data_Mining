@@ -7,9 +7,9 @@ Accéder à la compétition Kaggle:
 
 ## Table des matières
 
-* [A Propos du Projet](#a_propos_du_projet)
-* [Travailler sur le projet](#travailler_sur_le_projet)
-* [Organisation du Projet](#organisation_du_projet)
+* [A Propos du Projet](#a-propos-du-projet)
+* [Travailler sur le projet](#travailler-sur-le-projet)
+* [Organisation du Projet](#organisation-du-projet)
 * [Contact](#contact)
 
 ## A Propos du Projet
