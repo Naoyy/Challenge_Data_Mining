@@ -33,7 +33,7 @@ pip install -r requirements.txt
 ```
 
 
-## Organisation du projet
+## Organisation du Projet
 
 Dans le dossier Data il faut télécharger soit même les données nécessaire à l'apprentissage du modèle. Elles sont disponibles [ici](https://www.kaggle.com/competitions/estimate-co2-emissions-from-cars/data). Une fois les données téléchargées dezip puis placer dans le répertoire ./data
 
