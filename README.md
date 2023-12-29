@@ -68,6 +68,6 @@ Le notebook models.ipynb contient les modèles qui ont été utilisés pour les 
 
 ## Contact
 
-- [Jynaldo Jeannot](https://github.com/jeannoj99) - Jynaldo.Jeannot@etu.univ-paris1.fr
-- [Yoan Jsem](https://github.com/Naoyy) - Yoan.Jsem@etu.univ-paris1.fr
+- [Jynaldo Jeannot](https://github.com/jeannoj99) - jeannotjynaldo@gmail.com
+- [Yoan Jsem](https://github.com/Naoyy) - yoan.jsem@gmail.com
 <a name="contact"></a>
