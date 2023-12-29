@@ -48,11 +48,10 @@ Le notebook models.ipynb contient les modèles qui ont été utilisés pour les 
 
 - src/
     - preprocessing.py
-    - baseline.py
 
 - results/
-    - model1.csv (csv of the best submission)
-    - model2.csv (csv of the 2nd best submission)
+    - new_final_xgb_no_erwltp.csv (csv of the best submission)
+    - new_kf15_xgb.csv (csv of the 2nd best submission)
 
 - .gitignore
 
