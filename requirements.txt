@@ -93,7 +93,7 @@ pandocfilters==1.5.0
 parso==0.8.3
 patsy==0.5.3
 pickleshare==0.7.5
-Pillow==10.0.1
+Pillow==10.2.0
 platformdirs==3.11.0
 plotly==5.18.0
 prometheus-client==0.17.1
