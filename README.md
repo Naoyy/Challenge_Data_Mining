@@ -5,6 +5,7 @@ Projet dans le cadre du cours de Data Mining de Jeannot Jynaldo et Jsem Yoan.
 Accéder à la compétition Kaggle:
 [Estimate CO2 emissions from cars](https://www.kaggle.com/t/1827a6edacf742a69c7336b02e155948)
 
+Classement du groupe: 1er sur 16 équipes.
 ## Table des matières
 
 * [A Propos du Projet](#a-propos-du-projet)
