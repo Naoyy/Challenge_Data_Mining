@@ -21,8 +21,8 @@ Dans le cadre de cette compétition Kaggle, la promotion MoSEF 2024 se lance dan
 ## Travailler sur le projet
 1. Cloner le repository
 ```
-git clone https://github.com/Naoyy/Projet_Mining.git
-cd Projet_Mining
+git clone https://github.com/Naoyy/Challenge_Data_Mining.git
+cd Challenge_Data_Mining
 ```
 
 2. Travailler sur le projet en créant l'environnement virtuel
@@ -69,6 +69,6 @@ Le notebook models.ipynb contient les modèles qui ont été utilisés pour les 
 
 ## Contact
 
-- [Jynaldo Jeannot](https://github.com/jeannoj99) - jeannotjynaldo@gmail.com
+- [Jynaldo Jeannot](https://github.com/jeannoj99) - jeannotjynaldo.pro@gmail.com
 - [Yoan Jsem](https://github.com/Naoyy) - yoan.jsem@gmail.com
 <a name="contact"></a>
